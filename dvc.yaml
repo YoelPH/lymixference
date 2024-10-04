@@ -1,0 +1,113 @@
+vars:
+- params.yaml
+
+stages:
+  join:
+    wdir: .
+    desc: Concatenate any number of datasets so they can be used as one for training
+    vars:
+    - output: data/joined.csv
+    cmd: >
+      lyscripts data join
+      --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv 2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv data/UMC.csv data/USZ2.csv
+      --output ${output}
+    deps:
+    - 2021-usz-oropharynx/data.csv
+    - 2021-clb-oropharynx/data.csv
+    - 2023-isb-multisite/data.csv
+    - 2023-clb-multisite/data.csv
+    - 2024-hvh-oropharynx/data.csv
+    - data/UMC.csv
+    - data/USZ2.csv
+    outs:
+    - ${output}
+
+  enhance:
+    wdir: .
+    desc:
+      This stage fixes the super- and sub-level reporting for the LNLs and also creates
+      new 'modalities' from combining existing ones, e.g. using the logical AND or
+      estimating the most likely involvement based on the observations only.
+    vars:
+    - input: data/joined.csv
+    - output: data/enhanced.csv
+    cmd: >
+      lyscripts data enhance ${input} ${output} ${data_cleaning_modalities}
+    deps:
+    - ${input}
+    params:
+    - modalities
+    outs:
+    - ${output}
+
+  filter:
+    wdir: .
+    desc:
+      Select patients with oral cavity, oropharynx, hypopharynx and larynx subsites.
+      Further reduce the ICD codes.
+    cmd: >
+      python scripts/filter_and_reduce.py
+      --input data/enhanced.csv
+      --output data/filtered.csv
+    deps:
+      - scripts/filter_and_reduce.py
+      - data/enhanced.csv
+    outs:
+      - data/filtered.csv
+
+  fitting:
+    wdir: .
+    desc:
+      Fit mixture model
+    cmd: >
+      compute 
+      ${inference_modalities}
+    deps:
+    - ${general.data}
+    params:
+    - graph
+    - model
+    - em
+    - modalities
+    outs:
+    - ${general.samples}
+
+  # evaluate:
+  #   wdir: ..
+  #   desc:
+  #     Compute metrics for model evaluation and comparison. The metrics that are
+  #     produced here include the Bayesian information criterion (BIC), the maximum
+  #     and mean log likelihood (the latter being a measure of accuracy) and - if TI
+  #     was performed - it outputs the evidence by integrating said accuracy over the
+  #     inverse temparature ladder.
+  #   cmd: >
+  #     lyscripts evaluate ${general.data} ${general.samples}
+  #     --metrics ${general.metrics}
+  #     --plots ${general.plots_dir}/ti/accuracies.csv
+  #   params:
+  #   - graph
+  #   - model
+  #   - modalities
+  #   - sampling
+  #   deps:
+  #   - ${general.data}
+  #   - ${general.samples}
+  #   plots:
+  #   - ${general.plots_dir}/ti/accuracies.csv:
+  #       x: β
+  #       y: accuracy
+  #   metrics:
+  #   - ${general.metrics}
+
+  # plot-corner:
+  #   wdir: ..
+  #   desc: Create a corner plot of the last set of drawn samples.
+  #   cmd: >
+  #     lyscripts plot corner
+  #     ${general.samples}
+  #     ${general.plots_dir}/corner.png
+  #   deps:
+  #   - ${general.samples}
+  #   plots:
+  #   - ${general.plots_dir}/corner.png
+  #   - ${general.plots_dir}/corner.svg

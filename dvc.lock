@@ -1,0 +1,96 @@
+schema: '2.0'
+stages:
+  join:
+    cmd: "lyscripts data join --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv
+      2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv
+      data/UMC.csv data/USZ2.csv --output data/joined.csv\n"
+    deps:
+    - path: 2021-clb-oropharynx/data.csv
+      hash: md5
+      md5: af05aeaa3fea122dd718b3dd9c6a22b1
+      size: 92744
+    - path: 2021-usz-oropharynx/data.csv
+      hash: md5
+      md5: a9e4043ed6a273c609fa16523bcae455
+      size: 166966
+    - path: 2023-clb-multisite/data.csv
+      hash: md5
+      md5: 2ba19b79a80bf72f444dfe79a5165dc0
+      size: 113116
+    - path: 2023-isb-multisite/data.csv
+      hash: md5
+      md5: 24c25eedd6a832e595b12bd6b822a25c
+      size: 204462
+    - path: 2024-hvh-oropharynx/data.csv
+      hash: md5
+      md5: 7baa8021efbff0126fcf297e52106168
+      size: 82567
+    - path: data/UMC.csv
+      hash: md5
+      md5: ad3a40b76174aa3b7d1a4a6e1a1bebf8
+      size: 309194
+    - path: data/USZ2.csv
+      hash: md5
+      md5: 5881f048dae854da7312945d1417f3ec
+      size: 212402
+    outs:
+    - path: data/joined.csv
+      hash: md5
+      md5: 3763b23593cc9539e1c0b055f35c0ace
+      size: 1821171
+  enhance:
+    cmd: "lyscripts data enhance data/joined.csv data/enhanced.csv --modalities CT
+      MRI PET FNA diagnostic_consensus pathology pCT\n"
+    deps:
+    - path: data/joined.csv
+      hash: md5
+      md5: 3763b23593cc9539e1c0b055f35c0ace
+      size: 1821171
+    params:
+      params.yaml:
+        modalities:
+          CT:
+          - 0.76
+          - 0.81
+          MRI:
+          - 0.63
+          - 0.81
+          PET:
+          - 0.86
+          - 0.79
+          FNA:
+          - 0.98
+          - 0.8
+          diagnostic_consensus:
+          - 0.86
+          - 0.81
+          pathology:
+          - 1.0
+          - 1.0
+          pCT:
+          - 0.86
+          - 0.81
+          max_llh:
+          - 1.0
+          - 1.0
+    outs:
+    - path: data/enhanced.csv
+      hash: md5
+      md5: a2b8b42e05f122a7c7daea9eaa6ef76e
+      size: 2210944
+  filter:
+    cmd: "python scripts/filter_and_reduce.py --input data/enhanced.csv --output data/filtered.csv\n"
+    deps:
+    - path: data/enhanced.csv
+      hash: md5
+      md5: a2b8b42e05f122a7c7daea9eaa6ef76e
+      size: 2210944
+    - path: scripts/filter_and_reduce.py
+      hash: md5
+      md5: 696a8ec31332694f88d33a8d874a4e25
+      size: 3496
+    outs:
+    - path: data/filtered.csv
+      hash: md5
+      md5: 8fbf404fda90ce05c428c2672d07b19c
+      size: 2120034

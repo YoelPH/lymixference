@@ -1,0 +1,70 @@
+# Define some default directories, which can then be used
+# in the pipeline file `dvc.yaml`.
+general:
+  data: data/filtered.csv
+  samples: models/samples.hdf5
+  risks: models/risks.hdf5
+  prevalences: models/prevalences.hdf5
+  metrics: metrics.json
+  plots_dir: plots
+
+########################################################################################
+# This dictionary defines which LNLs are present in the
+# graph and how they are connected.
+graph:
+  tumor:
+    primary: [I, II, III, IV, V]
+  lnl:
+    I: [II]
+    II: [II]
+    III: [IV]
+    IV: []
+    V: []
+
+########################################################################################
+# Below are some parameters necessary for the model setup:
+model:
+  first_binom_prob: 0.3         # defines shape of time prior of first T-stage
+  max_t: 10                     # max number of time steps to evolve system
+  t_stages: [early, late]       # T-stages to consider in the data
+  class: Unilateral             # model class to use (see `lymph-model` docs)
+  side: ipsi
+  # keyword arguments to pass to the model constructor
+  kwargs:
+
+em:
+  seed: 42
+
+modalities:
+  CT: [0.76, 0.81]
+  MRI: [0.63, 0.81]
+  PET: [0.86, 0.79]
+  FNA: [0.98, 0.80]
+  diagnostic_consensus: [0.86, 0.81]
+  pathology: [1.0, 1.0]
+  pCT: [0.86, 0.81]
+  max_llh: [1.0, 1.0]
+
+# these of the above modalities will be used to compute things
+# like the naive maximum likelihood estimate of the true hidden
+# state `max_llh`, or the `rank` "modality".
+# The wird nested way of writing them down here is so that DVC can unpack the dict
+# directly into the command.
+data_cleaning_modalities:
+  modalities:
+  - CT
+  - MRI
+  - PET
+  - FNA
+  - diagnostic_consensus
+  - pathology
+  - pCT
+
+# this lists the above defined modalities that will be used for
+# inference and evaluation.
+# The wird nested way of writing them down here is so that DVC can unpack the dict
+# directly into the command.
+inference_modalities:
+  modalities:
+  - max_llh
+
