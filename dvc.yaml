@@ -58,19 +58,17 @@ stages:
   fitting:
     wdir: .
     desc:
-      Fit mixture model
+      Fit mixture model 
     cmd: >
-      compute 
-      ${inference_modalities}
+      lyscripts mixture_fit -i ${general.data}
     deps:
     - ${general.data}
+    # - ${general.history_dir}
     params:
     - graph
     - model
     - em
     - modalities
-    outs:
-    - ${general.samples}
 
   # evaluate:
   #   wdir: ..

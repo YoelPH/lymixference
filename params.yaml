@@ -2,11 +2,9 @@
 # in the pipeline file `dvc.yaml`.
 general:
   data: data/filtered.csv
-  samples: models/samples.hdf5
-  risks: models/risks.hdf5
-  prevalences: models/prevalences.hdf5
   metrics: metrics.json
   plots_dir: plots
+  history_dir: histories 
 
 ########################################################################################
 # This dictionary defines which LNLs are present in the
@@ -16,7 +14,7 @@ graph:
     primary: [I, II, III, IV, V]
   lnl:
     I: [II]
-    II: [II]
+    II: [III]
     III: [IV]
     IV: []
     V: []
@@ -29,6 +27,7 @@ model:
   t_stages: [early, late]       # T-stages to consider in the data
   class: Unilateral             # model class to use (see `lymph-model` docs)
   side: ipsi
+  num_components: 2
   # keyword arguments to pass to the model constructor
   kwargs:
 
