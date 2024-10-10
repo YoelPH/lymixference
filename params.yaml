@@ -28,6 +28,7 @@ model:
   class: Unilateral             # model class to use (see `lymph-model` docs)
   side: ipsi
   num_components: 2
+  # split_by: ("tumor", "1", "subsite")
   # keyword arguments to pass to the model constructor
   kwargs:
 
