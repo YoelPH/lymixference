@@ -22,11 +22,16 @@ graph:
 ########################################################################################
 # Below are some parameters necessary for the model setup:
 model:
-  first_binom_prob: 0.3         # defines shape of time prior of first T-stage
-  max_t: 10                     # max number of time steps to evolve system
-  t_stages: [early, late]       # T-stages to consider in the data
   class: Unilateral             # model class to use (see `lymph-model` docs)
   side: ipsi
+  distributions:                # marginalize over diagnosis times. Keys are T-stages
+    early:
+      frozen: binomial
+      max_time: 10
+      kwargs: {p: 0.3}
+    late:
+      parametric: binomial
+      max_time: 10
   num_components: 2
   # split_by: ("tumor", "1", "subsite")
   # keyword arguments to pass to the model constructor
@@ -65,6 +70,5 @@ data_cleaning_modalities:
 # The wird nested way of writing them down here is so that DVC can unpack the dict
 # directly into the command.
 inference_modalities:
-  modalities:
-  - max_llh
+  max_llh: [1.0, 1.0]
 
