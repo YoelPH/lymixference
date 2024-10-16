@@ -52,6 +52,8 @@ stages:
     deps:
       - scripts/filter_and_reduce.py
       - data/enhanced.csv
+    params:
+    - general
     outs:
       - data/filtered.csv
 
@@ -63,49 +65,38 @@ stages:
       lyscripts mixture_fit -i ${general.data}
     deps:
     - ${general.data}
-    # - ${general.history_dir}
     params:
     - graph
     - model
     - em
     - modalities
+    - general
 
-  # evaluate:
-  #   wdir: ..
-  #   desc:
-  #     Compute metrics for model evaluation and comparison. The metrics that are
-  #     produced here include the Bayesian information criterion (BIC), the maximum
-  #     and mean log likelihood (the latter being a measure of accuracy) and - if TI
-  #     was performed - it outputs the evidence by integrating said accuracy over the
-  #     inverse temparature ladder.
-  #   cmd: >
-  #     lyscripts evaluate ${general.data} ${general.samples}
-  #     --metrics ${general.metrics}
-  #     --plots ${general.plots_dir}/ti/accuracies.csv
-  #   params:
-  #   - graph
-  #   - model
-  #   - modalities
-  #   - sampling
-  #   deps:
-  #   - ${general.data}
-  #   - ${general.samples}
-  #   plots:
-  #   - ${general.plots_dir}/ti/accuracies.csv:
-  #       x: β
-  #       y: accuracy
-  #   metrics:
-  #   - ${general.metrics}
+  plot-mixture-matrix:
+    wdir: .
+    desc: Plots the mixture component matrix
+    cmd: >
+      lyscripts plot mixture_plot
+      --input ${general.history_dir}/mixture_coef.csv
+      --output ${general.plots_dir}/mixture_matrix.png
+    deps:
+    - ${general.history_dir}
+    plots:
+    - ${general.plots_dir}/mixture_matrix.png
+    - ${general.plots_dir}/mixture_matrix.svg
 
-  # plot-corner:
-  #   wdir: ..
-  #   desc: Create a corner plot of the last set of drawn samples.
-  #   cmd: >
-  #     lyscripts plot corner
-  #     ${general.samples}
-  #     ${general.plots_dir}/corner.png
-  #   deps:
-  #   - ${general.samples}
-  #   plots:
-  #   - ${general.plots_dir}/corner.png
-  #   - ${general.plots_dir}/corner.svg
+  plot-simplex:
+    wdir: .
+    desc: Plots the simplex representation of the mixture coefficients
+    cmd: >
+      lyscripts plot simplex_plot
+      --input ${general.history_dir}/mixture_coef.csv
+      --output ${general.plots_dir}/mixture_matrix.png
+    deps:
+    - ${general.history_dir}
+    plots:
+    - ${general.plots_dir}/mixture_matrix.png
+    - ${general.plots_dir}/mixture_matrix.svg
+    params:
+    - general
+

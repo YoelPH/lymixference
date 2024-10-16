@@ -6,7 +6,7 @@ The reason is a lack of data for other subsites. (Note for C32.2 we only have 15
 """
 import argparse
 from pathlib import Path
-
+from lyscripts.utils import load_yaml_params
 import pandas as pd
 
 
@@ -119,17 +119,43 @@ for icd_list in LARYNX_ICD_CODES.values():
     for icd in icd_list:
         icd_codes.append(icd)
 
+def _add_arguments(parser: argparse.ArgumentParser):
+    """Add arguments to a ``subparsers`` instance and run its main function when chosen.
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, help="Input CSV file")
+    This is called by the parent module that is called via the command line.
+    """
+    parser.add_argument(
+        "-i", "--input", type=Path, required=True,
+        help="Path to training data files"
+    )
+
+    parser.add_argument(
+        "-p", "--params", default="./params.yaml", type=Path,
+        help="Path to parameter file."
+    )
     parser.add_argument("--output", type=Path, help="Output CSV file")
-    args = parser.parse_args()
 
+    parser.set_defaults(run_main=main)
+
+
+def main(args: argparse.Namespace) -> None:
+    
+    params = load_yaml_params(args.params)
+    args = parser.parse_args()
+    print('HEEEEEEEEEEEEEEEEEEEEEEEERE',params)
     patient_data = pd.read_csv(args.input, header=[0, 1, 2])
     is_relevant = patient_data["tumor", "1", "subsite"].isin(icd_codes)
     relevant_data = patient_data[is_relevant]
     reduced_data = relevant_data.loc[~(relevant_data['tumor']['1']['subsite'].str.startswith(('C32'))), ('tumor', '1', 'subsite')] = (
     relevant_data.loc[~(relevant_data['tumor']['1']['subsite'].str.startswith(('C32'))), ('tumor', '1', 'subsite')].str.replace(r'\..*', '', regex=True))
     relevant_data.to_csv(args.output, index=False)
+    icd_df = pd.DataFrame(icd_codes, columns=['icd codes'])
+    icd_df.to_csv(params['general']['data_folder'] + '/icds.csv', index = False)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    _add_arguments(parser)
+
+    args = parser.parse_args()
+    args.run_main(args)
 

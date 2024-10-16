@@ -87,10 +87,99 @@ stages:
       size: 2210944
     - path: scripts/filter_and_reduce.py
       hash: md5
-      md5: 696a8ec31332694f88d33a8d874a4e25
-      size: 3496
+      md5: a57e4864954435e865cfec09beb245fe
+      size: 4362
+    params:
+      params.yaml:
+        general:
+          data: data/filtered.csv
+          data_folder: data
+          metrics: metrics.json
+          plots_dir: plots
+          history_dir: histories
     outs:
     - path: data/filtered.csv
       hash: md5
       md5: 8fbf404fda90ce05c428c2672d07b19c
       size: 2120034
+  fitting:
+    cmd: "lyscripts mixture_fit -i data/filtered.csv\n"
+    deps:
+    - path: data/filtered.csv
+      hash: md5
+      md5: 8fbf404fda90ce05c428c2672d07b19c
+      size: 2120034
+    params:
+      params.yaml:
+        em:
+          seed: 42
+        general:
+          data: data/filtered.csv
+          data_folder: data
+          metrics: metrics.json
+          plots_dir: plots
+          history_dir: histories
+        graph:
+          tumor:
+            primary:
+            - II
+          lnl:
+            II: []
+        modalities:
+          CT:
+          - 0.76
+          - 0.81
+          MRI:
+          - 0.63
+          - 0.81
+          PET:
+          - 0.86
+          - 0.79
+          FNA:
+          - 0.98
+          - 0.8
+          diagnostic_consensus:
+          - 0.86
+          - 0.81
+          pathology:
+          - 1.0
+          - 1.0
+          pCT:
+          - 0.86
+          - 0.81
+          max_llh:
+          - 1.0
+          - 1.0
+        model:
+          class: Unilateral
+          side: ipsi
+          distributions:
+            early:
+              frozen: binomial
+              max_time: 10
+              kwargs:
+                p: 0.3
+            late:
+              parametric: binomial
+              max_time: 10
+          num_components: 2
+          likelihood_tolerance: 6
+          kwargs:
+  plot-mixture-matrix:
+    cmd: "lyscripts plot mixture_plot --input histories/mixture_coef.csv --output
+      plots/mixture_matrix.png\n"
+    deps:
+    - path: histories
+      hash: md5
+      md5: ca2a890abd58a08bc376ad37a7c94ea6.dir
+      size: 3916
+      nfiles: 3
+    outs:
+    - path: plots/mixture_matrix.png
+      hash: md5
+      md5: 7e4eb99a326ba611a276bd6e77fda1eb
+      size: 51445
+    - path: plots/mixture_matrix.svg
+      hash: md5
+      md5: 8089b10101515fa98403457b706aade0
+      size: 35091
