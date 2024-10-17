@@ -181,5 +181,5 @@ stages:
       size: 51445
     - path: plots/mixture_matrix.svg
       hash: md5
-      md5: 8089b10101515fa98403457b706aade0
+      md5: 746e043957ba2b2324fb8264461b20e8
       size: 35091

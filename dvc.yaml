@@ -91,12 +91,12 @@ stages:
     cmd: >
       lyscripts plot simplex_plot
       --input ${general.history_dir}/mixture_coef.csv
-      --output ${general.plots_dir}/mixture_matrix.png
+      --output ${general.plots_dir}/simplex.png
     deps:
     - ${general.history_dir}
     plots:
-    - ${general.plots_dir}/mixture_matrix.png
-    - ${general.plots_dir}/mixture_matrix.svg
+    - ${general.plots_dir}/simplex.png
+    - ${general.plots_dir}/simplex.svg
     params:
     - general
 
