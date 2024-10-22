@@ -87,8 +87,8 @@ stages:
       size: 2210944
     - path: scripts/filter_and_reduce.py
       hash: md5
-      md5: a57e4864954435e865cfec09beb245fe
-      size: 4362
+      md5: 1efdb2fa1ae54ee2aa06c2ba40a933e6
+      size: 4701
     params:
       params.yaml:
         general:
@@ -100,8 +100,8 @@ stages:
     outs:
     - path: data/filtered.csv
       hash: md5
-      md5: 8fbf404fda90ce05c428c2672d07b19c
-      size: 2120034
+      md5: acbb7a8a643b3ec63d77417aa58f3f3f
+      size: 1967166
   fitting:
     cmd: "lyscripts mixture_fit -i data/filtered.csv\n"
     deps:

@@ -142,11 +142,16 @@ def main(args: argparse.Namespace) -> None:
     
     params = load_yaml_params(args.params)
     args = parser.parse_args()
-    print('HEEEEEEEEEEEEEEEEEEEEEEEERE',params)
     patient_data = pd.read_csv(args.input, header=[0, 1, 2])
     is_relevant = patient_data["tumor", "1", "subsite"].isin(icd_codes)
     relevant_data = patient_data[is_relevant]
-    reduced_data = relevant_data.loc[~(relevant_data['tumor']['1']['subsite'].str.startswith(('C32'))), ('tumor', '1', 'subsite')] = (
+    #filter T0 and T1 glottis which have no involvement by definition
+    glottis_selected_indices = (relevant_data['tumor']['1']['subsite'] == 'C32.0') & (relevant_data['tumor']['1']['t_stage'].isin([0, 1]))
+    relevant_data = relevant_data.loc[~glottis_selected_indices]
+    #filter empty patient
+    relevant_data = relevant_data.loc[~(relevant_data['max_llh']['ipsi'].isna().sum(axis = 1) == 16)]
+    #reduce ICD codes
+    relevant_data.loc[~(relevant_data['tumor']['1']['subsite'].str.startswith(('C32'))), ('tumor', '1', 'subsite')] = (
     relevant_data.loc[~(relevant_data['tumor']['1']['subsite'].str.startswith(('C32'))), ('tumor', '1', 'subsite')].str.replace(r'\..*', '', regex=True))
     relevant_data.to_csv(args.output, index=False)
     icd_df = pd.DataFrame(icd_codes, columns=['icd codes'])
