@@ -19,11 +19,22 @@ general:
 #     III: [IV]
 #     IV: []
 #     V: []
+# graph:
+#   tumor:
+#     primary: [II]
+#   lnl:
+#     II: []
 graph:
   tumor:
-    primary: [II]
+    primary: [I, II, III, IV, V, VI, VII]
   lnl:
-    II: []
+    I: [II]
+    II: [III]
+    III: [IV]
+    IV: [V]
+    V: []
+    VI: []
+    VII: []
 
 
 ########################################################################################
@@ -39,8 +50,8 @@ model:
     late:
       parametric: binomial
       max_time: 10
-  num_components: 2
-  likelihood_tolerance: 6
+  num_components: 4
+  likelihood_tolerance: 0.01
   # split_by: ("tumor", "1", "subsite")
   # keyword arguments to pass to the model constructor
   kwargs:

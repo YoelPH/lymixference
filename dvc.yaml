@@ -74,7 +74,7 @@ stages:
 
   plot-mixture-matrix:
     wdir: .
-    desc: Plots the mixture component matrix
+    desc: Plots the mixture component matrix.
     cmd: >
       lyscripts plot mixture_plot
       --input ${general.history_dir}/mixture_coef.csv
@@ -85,18 +85,18 @@ stages:
     - ${general.plots_dir}/mixture_matrix.png
     - ${general.plots_dir}/mixture_matrix.svg
 
-  plot-simplex:
-    wdir: .
-    desc: Plots the simplex representation of the mixture coefficients
-    cmd: >
-      lyscripts plot simplex_plot
-      --input ${general.history_dir}/mixture_coef.csv
-      --output ${general.plots_dir}/simplex.png
-    deps:
-    - ${general.history_dir}
-    plots:
-    - ${general.plots_dir}/simplex.png
-    - ${general.plots_dir}/simplex.svg
-    params:
-    - general
+  # plot-simplex:
+  #   wdir: .
+  #   desc: Plots the simplex representation of the mixture coefficients
+  #   cmd: >
+  #     lyscripts plot simplex_plot
+  #     --input ${general.history_dir}/mixture_coef.csv
+  #     --output ${general.plots_dir}/simplex.png
+  #   deps:
+  #   - ${general.history_dir}
+  #   plots:
+  #   - ${general.plots_dir}/simplex.png
+  #   - ${general.plots_dir}/simplex.svg
+  #   params:
+  #   - general
 
