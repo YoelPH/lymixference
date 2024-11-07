@@ -115,9 +115,9 @@ for icd_list in HYPOPHARYNX_ICD_CODES.values():
         icd_codes.append(icd)
 
 # Add ICD codes from LARYNX_ICD_CODES
-for icd_list in LARYNX_ICD_CODES.values():
-    for icd in icd_list:
-        icd_codes.append(icd)
+# for icd_list in LARYNX_ICD_CODES.values():
+#     for icd in icd_list:
+#         icd_codes.append(icd)
 
 def _add_arguments(parser: argparse.ArgumentParser):
     """Add arguments to a ``subparsers`` instance and run its main function when chosen.

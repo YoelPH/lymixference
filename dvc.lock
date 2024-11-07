@@ -87,8 +87,8 @@ stages:
       size: 2210944
     - path: scripts/filter_and_reduce.py
       hash: md5
-      md5: 5f714e19a078223730573e3f51fdc4e4
-      size: 4723
+      md5: 42181777849159067afc148dd8259b5e
+      size: 4729
     params:
       params.yaml:
         general:
@@ -100,15 +100,15 @@ stages:
     outs:
     - path: data/filtered.csv
       hash: md5
-      md5: acbb7a8a643b3ec63d77417aa58f3f3f
-      size: 1967166
+      md5: 1bfb813c46c20e164df9c838e7d6e295
+      size: 1359913
   fitting:
     cmd: "lyscripts mixture_fit -i data/filtered.csv\n"
     deps:
     - path: data/filtered.csv
       hash: md5
-      md5: acbb7a8a643b3ec63d77417aa58f3f3f
-      size: 1967166
+      md5: 1bfb813c46c20e164df9c838e7d6e295
+      size: 1359913
     params:
       params.yaml:
         em:
@@ -178,7 +178,7 @@ stages:
             late:
               parametric: binomial
               max_time: 10
-          num_components: 4
+          num_components: 3
           likelihood_tolerance: 0.01
           kwargs:
   plot-mixture-matrix:
@@ -187,15 +187,41 @@ stages:
     deps:
     - path: histories
       hash: md5
-      md5: 8adc4adf1eccc4f57a66aba285b1a988.dir
-      size: 285597
-      nfiles: 3
+      md5: 7efd0f872cc8b3ef40d6fd0d4384f4ef.dir
+      size: 391418
+      nfiles: 6
     outs:
     - path: plots/mixture_matrix.png
       hash: md5
-      md5: 564913dee8c32af96937096781364e10
-      size: 65433
+      md5: 06308a42d91a332dc33851e4d226678d
+      size: 50311
     - path: plots/mixture_matrix.svg
       hash: md5
-      md5: 896f4a238b95377365f803aed845b5cd
-      size: 45773
+      md5: 23af0cb562c9f04b3e3ed97e0c622974
+      size: 35490
+  plot-simplex:
+    cmd: "lyscripts plot simplex_plot --input histories/mixture_coef.csv --output
+      plots/simplex.png\n"
+    deps:
+    - path: histories
+      hash: md5
+      md5: 7efd0f872cc8b3ef40d6fd0d4384f4ef.dir
+      size: 391418
+      nfiles: 6
+    params:
+      params.yaml:
+        general:
+          data: data/filtered.csv
+          data_folder: data
+          metrics: metrics.json
+          plots_dir: plots
+          history_dir: histories
+    outs:
+    - path: plots/simplex.png
+      hash: md5
+      md5: d5777bbcc63ad5342453e72ade162307
+      size: 81871
+    - path: plots/simplex.svg
+      hash: md5
+      md5: 5256c4d644e993457cdbabfa4e270b42
+      size: 60530
