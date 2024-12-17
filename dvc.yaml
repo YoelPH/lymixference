@@ -57,20 +57,20 @@ stages:
     outs:
       - data/filtered.csv
 
-  fitting:
-    wdir: .
-    desc:
-      Fit mixture model 
-    cmd: >
-      lyscripts mixture_fit -i ${general.data}
-    deps:
-    - ${general.data}
-    params:
-    - graph
-    - model
-    - em
-    - modalities
-    - general
+  # fitting:
+  #   wdir: .
+  #   desc:
+  #     Fit mixture model 
+  #   cmd: >
+  #     lyscripts mixture_fit -i ${general.data}
+  #   deps:
+  #   - ${general.data}
+  #   params:
+  #   - graph
+  #   - model
+  #   - em
+  #   - modalities
+  #   - general
 
   plot-mixture-matrix:
     wdir: .
@@ -85,18 +85,53 @@ stages:
     - ${general.plots_dir}/mixture_matrix.png
     - ${general.plots_dir}/mixture_matrix.svg
 
-  plot-simplex:
+  # plot-simplex:
+  #   wdir: .
+  #   desc: Plots the simplex representation of the mixture coefficients
+  #   cmd: >
+  #     lyscripts plot simplex_plot
+  #     --input ${general.history_dir}/mixture_coef.csv
+  #     --output ${general.plots_dir}/simplex.png
+  #   deps:
+  #   - ${general.history_dir}
+  #   plots:
+  #   - ${general.plots_dir}/simplex.png
+  #   - ${general.plots_dir}/simplex.svg
+  #   params:
+  #   - general
+
+  sample-params:
     wdir: .
-    desc: Plots the simplex representation of the mixture coefficients
+    desc: Sample parameters from the fitted model
     cmd: >
-      lyscripts plot simplex_plot
-      --input ${general.history_dir}/mixture_coef.csv
-      --output ${general.plots_dir}/simplex.png
-    deps:
-    - ${general.history_dir}
-    plots:
-    - ${general.plots_dir}/simplex.png
-    - ${general.plots_dir}/simplex.svg
+      lyscripts mixture_sample
+      --model_params ${general.history_dir}/params.csv
+      --mode fixed_latent
+      -d ${general.data}
+      -o ${general.history_dir}/
+      -c True
     params:
-    - general
+      - graph
+      - model
+      - modalities
+      - sampling
+      - general
+  
+  plot-sampling:
+    wdir: .
+    desc: Plot the sampling results
+    cmd: >
+      lyscripts plot mixture_sampling_plotter
+      --input ${general.history_dir}/fixed_mixture.hdf5
+      --output ${general.plots_dir}/sampling
+      --mode fixed_mixture
+      -d ${general.data}
+      --model_params ${general.history_dir}/params.csv
+      --size 250
+    deps:
+      - ${general.history_dir}/fixed_mixture.hdf5
+    params:
+      - general
+      - graph
+      - model
 

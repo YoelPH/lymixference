@@ -87,8 +87,8 @@ stages:
       size: 2210944
     - path: scripts/filter_and_reduce.py
       hash: md5
-      md5: 42181777849159067afc148dd8259b5e
-      size: 4729
+      md5: afb25861f0ffab607e9b75fa2612f93a
+      size: 5056
     params:
       params.yaml:
         general:
@@ -100,8 +100,8 @@ stages:
     outs:
     - path: data/filtered.csv
       hash: md5
-      md5: 1bfb813c46c20e164df9c838e7d6e295
-      size: 1359913
+      md5: 7dd851590e8d3c3fbe1980dce0d4db9a
+      size: 1366123
   fitting:
     cmd: "lyscripts mixture_fit -i data/filtered.csv\n"
     deps:
@@ -187,9 +187,9 @@ stages:
     deps:
     - path: histories
       hash: md5
-      md5: 7efd0f872cc8b3ef40d6fd0d4384f4ef.dir
-      size: 391418
-      nfiles: 6
+      md5: e680e7c0b95e46d01110ce95cd89f2fc.dir
+      size: 1551535866
+      nfiles: 8
     outs:
     - path: plots/mixture_matrix.png
       hash: md5
@@ -197,7 +197,7 @@ stages:
       size: 50311
     - path: plots/mixture_matrix.svg
       hash: md5
-      md5: 23af0cb562c9f04b3e3ed97e0c622974
+      md5: 78a3c6e859ebd45ee32cae1b719339fd
       size: 35490
   plot-simplex:
     cmd: "lyscripts plot simplex_plot --input histories/mixture_coef.csv --output
@@ -225,3 +225,133 @@ stages:
       hash: md5
       md5: 5256c4d644e993457cdbabfa4e270b42
       size: 60530
+  sample-params:
+    cmd: "lyscripts mixture_sample --mixture_coefs histories/mixture_coef.csv --model_params
+      histories/params.csv --mode fixed_latent -d data/filtered.csv -o histories/
+      -c True\n"
+    params:
+      params.yaml:
+        general:
+          data: data/filtered.csv
+          data_folder: data
+          metrics: metrics.json
+          plots_dir: plots
+          history_dir: histories
+        graph:
+          tumor:
+            primary:
+            - I
+            - II
+            - III
+            - IV
+            - V
+            - VI
+            - VII
+          lnl:
+            I:
+            - II
+            II:
+            - III
+            III:
+            - IV
+            IV:
+            - V
+            V: []
+            VI: []
+            VII: []
+        modalities:
+          CT:
+          - 0.76
+          - 0.81
+          MRI:
+          - 0.63
+          - 0.81
+          PET:
+          - 0.86
+          - 0.79
+          FNA:
+          - 0.98
+          - 0.8
+          diagnostic_consensus:
+          - 0.86
+          - 0.81
+          pathology:
+          - 1.0
+          - 1.0
+          pCT:
+          - 0.86
+          - 0.81
+          max_llh:
+          - 1.0
+          - 1.0
+        model:
+          class: Unilateral
+          side: ipsi
+          distributions:
+            early:
+              frozen: binomial
+              max_time: 10
+              kwargs:
+                p: 0.3
+            late:
+              parametric: binomial
+              max_time: 10
+          num_components: 3
+          likelihood_tolerance: 0.01
+          kwargs:
+        sampling:
+          steps: 6000
+  plot-sampling:
+    cmd: "lyscripts plot mixture_sampling_plotter --input histories/fixed_mixture.hdf5
+      --output plots/sampling --mode fixed_mixture -d data/filtered.csv --model_params
+      histories/params.csv --size 250\n"
+    deps:
+    - path: histories/fixed_mixture.hdf5
+      hash: md5
+      md5: a648e45a5564112d72ae2d8ba7e5cdc0
+      size: 140202136
+    params:
+      params.yaml:
+        general:
+          data: data/filtered.csv
+          data_folder: data
+          metrics: metrics.json
+          plots_dir: plots
+          history_dir: histories
+        graph:
+          tumor:
+            primary:
+            - I
+            - II
+            - III
+            - IV
+            - V
+            - VI
+            - VII
+          lnl:
+            I:
+            - II
+            II:
+            - III
+            III:
+            - IV
+            IV:
+            - V
+            V: []
+            VI: []
+            VII: []
+        model:
+          class: Unilateral
+          side: ipsi
+          distributions:
+            early:
+              frozen: binomial
+              max_time: 10
+              kwargs:
+                p: 0.3
+            late:
+              parametric: binomial
+              max_time: 10
+          num_components: 3
+          likelihood_tolerance: 0.01
+          kwargs:

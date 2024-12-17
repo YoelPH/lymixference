@@ -91,3 +91,5 @@ data_cleaning_modalities:
 inference_modalities:
   max_llh: [1.0, 1.0]
 
+sampling:
+  steps: 6000

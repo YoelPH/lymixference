@@ -148,12 +148,21 @@ def main(args: argparse.Namespace) -> None:
     #filter T0 and T1 glottis which have no involvement by definition
     glottis_selected_indices = (relevant_data['tumor']['1']['subsite'] == 'C32.0') & (relevant_data['tumor']['1']['t_stage'].isin([0, 1]))
     relevant_data = relevant_data.loc[~glottis_selected_indices]
-    #filter empty patient
+    #filter empty patient(s)
     relevant_data = relevant_data.loc[~(relevant_data['max_llh']['ipsi'].isna().sum(axis = 1) == 16)]
+
     #reduce ICD codes
     relevant_data.loc[~(relevant_data['tumor']['1']['subsite'].str.startswith(('C32'))), ('tumor', '1', 'subsite')] = (
     relevant_data.loc[~(relevant_data['tumor']['1']['subsite'].str.startswith(('C32'))), ('tumor', '1', 'subsite')].str.replace(r'\..*', '', regex=True))
+    
+    #set LNL VI as False for Oropharynx and Oral Cavity patients (all patients have a None entry which will be marginalized over)
+    icd_no_VI = ['C01','C02','C03','C04','C05','C06','C09','C10']
+    relevant_data.loc[relevant_data[('tumor', '1', 'subsite')].isin(icd_no_VI),('max_llh', 'ipsi', 'VI')] = False
+    
     relevant_data.to_csv(args.output, index=False)
+
+
+
     icd_df = pd.DataFrame(icd_codes, columns=['icd codes'])
     icd_df.to_csv(params['general']['data_folder'] + '/icds.csv', index = False)
 
