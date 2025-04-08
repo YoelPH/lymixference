@@ -44,33 +44,33 @@ stages:
     wdir: .
     desc:
       Select patients with oral cavity, oropharynx, hypopharynx and larynx subsites.
-      Further reduce the ICD codes.
+      Further reduce the ICD codes. 3 comp no VI VII right now.
     cmd: >
       python scripts/filter_and_reduce.py
       --input data/enhanced.csv
-      --output data/filtered.csv
+      --output data/filtered_3_comp_no_VI_VII.csv
     deps:
       - scripts/filter_and_reduce.py
       - data/enhanced.csv
     params:
     - general
     outs:
-      - data/filtered.csv
+      - data/filtered_3_comp_no_VI_VII.csv
 
-  # fitting:
-  #   wdir: .
-  #   desc:
-  #     Fit mixture model 
-  #   cmd: >
-  #     lyscripts mixture_fit -i ${general.data}
-  #   deps:
-  #   - ${general.data}
-  #   params:
-  #   - graph
-  #   - model
-  #   - em
-  #   - modalities
-  #   - general
+  fitting:
+    wdir: .
+    desc:
+      Fit mixture model 
+    cmd: >
+      lyscripts mixture_fit -i ${general.data}
+    deps:
+    - ${general.data}
+    params:
+    - graph
+    - model
+    - em
+    - modalities
+    - general
 
   plot-mixture-matrix:
     wdir: .
@@ -78,38 +78,38 @@ stages:
     cmd: >
       lyscripts plot mixture_plot
       --input ${general.history_dir}/mixture_coef.csv
-      --output ${general.plots_dir}/mixture_matrix.png
+      --output ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.png
     deps:
     - ${general.history_dir}
     plots:
-    - ${general.plots_dir}/mixture_matrix.png
-    - ${general.plots_dir}/mixture_matrix.svg
+    - ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.png
+    - ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.svg
 
-  # plot-simplex:
-  #   wdir: .
-  #   desc: Plots the simplex representation of the mixture coefficients
-  #   cmd: >
-  #     lyscripts plot simplex_plot
-  #     --input ${general.history_dir}/mixture_coef.csv
-  #     --output ${general.plots_dir}/simplex.png
-  #   deps:
-  #   - ${general.history_dir}
-  #   plots:
-  #   - ${general.plots_dir}/simplex.png
-  #   - ${general.plots_dir}/simplex.svg
-  #   params:
-  #   - general
+  plot-simplex:
+    wdir: .
+    desc: Plots the simplex representation of the mixture coefficients
+    cmd: >
+      lyscripts plot simplex_plot
+      --input ${general.history_dir}/mixture_coef.csv
+      --output ${general.plots_dir}/simplex_3_comp_no_VI_VII.png
+    deps:
+    - ${general.history_dir}
+    plots:
+    - ${general.plots_dir}/simplex_3_comp_no_VI_VII.png
+    - ${general.plots_dir}/simplex_3_comp_no_VI_VII.svg
+    params:
+    - general
 
   sample-params:
     wdir: .
     desc: Sample parameters from the fitted model
     cmd: >
       lyscripts mixture_sample
+      --mixture_coefs ${general.history_dir}/mixture_coef.csv
       --model_params ${general.history_dir}/params.csv
-      --mode fixed_latent
+      --mode fixed_mixture
       -d ${general.data}
       -o ${general.history_dir}/
-      -c True
     params:
       - graph
       - model
@@ -117,19 +117,36 @@ stages:
       - sampling
       - general
   
+  sample-params2:
+    wdir: .
+    desc: Sample parameters from the fitted model
+    cmd: >
+      lyscripts mixture_sample
+      --model_params ${general.history_dir}/params.csv
+      --mode fixed_latent
+      --mixture_coefs ${general.history_dir}/mixture_coef.csv
+      -d ${general.data}
+      -o ${general.history_dir}/
+    params:
+      - graph
+      - model
+      - modalities
+      - sampling
+      - general
+
   plot-sampling:
     wdir: .
     desc: Plot the sampling results
     cmd: >
       lyscripts plot mixture_sampling_plotter
-      --input ${general.history_dir}/fixed_mixture.hdf5
-      --output ${general.plots_dir}/sampling
+      --input ${general.history_dir}/fixed_latent.hdf5
+      --output ${general.plots_dir}/sampling_3_comp
       --mode fixed_mixture
       -d ${general.data}
       --model_params ${general.history_dir}/params.csv
-      --size 250
+      --size 400
     deps:
-      - ${general.history_dir}/fixed_mixture.hdf5
+      - ${general.history_dir}/fixed_latent.hdf5
     params:
       - general
       - graph

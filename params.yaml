@@ -1,7 +1,7 @@
 # Define some default directories, which can then be used
 # in the pipeline file `dvc.yaml`.
 general:
-  data: data/filtered.csv
+  data: data/filtered_3_comp_no_VI_VII.csv
   data_folder: data
   metrics: metrics.json
   plots_dir: plots
@@ -10,31 +10,27 @@ general:
 ########################################################################################
 # This dictionary defines which LNLs are present in the
 # graph and how they are connected.
-# graph:
-#   tumor:
-#     primary: [I, II, III, IV, V]
-#   lnl:
-#     I: [II]
-#     II: [III]
-#     III: [IV]
-#     IV: []
-#     V: []
-# graph:
-#   tumor:
-#     primary: [II]
-#   lnl:
-#     II: []
 graph:
   tumor:
-    primary: [I, II, III, IV, V, VI, VII]
+    primary: [I, II, III, IV, V]
   lnl:
     I: [II]
     II: [III]
     III: [IV]
     IV: [V]
     V: []
-    VI: []
-    VII: []
+
+# graph:
+#   tumor:
+#     primary: [I, II, III, IV, V, VI, VII]
+#   lnl:
+#     I: [II]
+#     II: [III]
+#     III: [IV]
+#     IV: [V]
+#     V: []
+#     VI: []
+#     VII: []
 
 
 ########################################################################################
@@ -51,7 +47,7 @@ model:
       parametric: binomial
       max_time: 10
   num_components: 3
-  likelihood_tolerance: 0.01
+  likelihood_tolerance: 0.001
   # split_by: ("tumor", "1", "subsite")
   # keyword arguments to pass to the model constructor
   kwargs:
@@ -92,4 +88,4 @@ inference_modalities:
   max_llh: [1.0, 1.0]
 
 sampling:
-  steps: 6000
+  steps: 35000
