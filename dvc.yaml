@@ -48,14 +48,14 @@ stages:
     cmd: >
       python scripts/filter_and_reduce.py
       --input data/enhanced.csv
-      --output data/filtered_3_comp_no_VI_VII.csv
+      --output data/filtered_2_comp_no_VI_VII.csv
     deps:
       - scripts/filter_and_reduce.py
       - data/enhanced.csv
     params:
     - general
     outs:
-      - data/filtered_3_comp_no_VI_VII.csv
+      - data/filtered_2_comp_no_VI_VII.csv
 
   fitting:
     wdir: .
