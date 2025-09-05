@@ -1,0 +1,154 @@
+vars:
+- params.yaml
+
+stages:
+  join:
+    wdir: .
+    desc: Concatenate any number of datasets so they can be used as one for training
+    vars:
+    - output: data/joined.csv
+    cmd: >
+      lyscripts data join
+      --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv 2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv data/UMC.csv data/USZ2.csv
+      --output ${output}
+    deps:
+    - 2021-usz-oropharynx/data.csv
+    - 2021-clb-oropharynx/data.csv
+    - 2023-isb-multisite/data.csv
+    - 2023-clb-multisite/data.csv
+    - 2024-hvh-oropharynx/data.csv
+    - data/UMC.csv
+    - data/USZ2.csv
+    outs:
+    - ${output}
+
+  enhance:
+    wdir: .
+    desc:
+      This stage fixes the super- and sub-level reporting for the LNLs and also creates
+      new 'modalities' from combining existing ones, e.g. using the logical AND or
+      estimating the most likely involvement based on the observations only.
+    vars:
+    - input: data/joined.csv
+    - output: data/enhanced.csv
+    cmd: >
+      lyscripts data enhance ${input} ${output} ${data_cleaning_modalities}
+    deps:
+    - ${input}
+    params:
+    - modalities
+    outs:
+    - ${output}
+
+  filter:
+    wdir: .
+    desc:
+      Select patients with oral cavity, oropharynx, hypopharynx and larynx subsites.
+      Further reduce the ICD codes. 3 comp no VI VII right now.
+    cmd: >
+      python scripts/filter_and_reduce.py
+      --input data/enhanced.csv
+      --output data/filtered_2_comp_no_VI_VII.csv
+    deps:
+      - scripts/filter_and_reduce.py
+      - data/enhanced.csv
+    params:
+    - general
+    outs:
+      - data/filtered_2_comp_no_VI_VII.csv
+
+  fitting:
+    wdir: .
+    desc:
+      Fit mixture model 
+    cmd: >
+      lyscripts mixture_fit -i ${general.data}
+    deps:
+    - ${general.data}
+    params:
+    - graph
+    - model
+    - em
+    - modalities
+    - general
+
+  plot-mixture-matrix:
+    wdir: .
+    desc: Plots the mixture component matrix.
+    cmd: >
+      lyscripts plot mixture_plot
+      --input ${general.history_dir}/mixture_coef.csv
+      --output ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.png
+    deps:
+    - ${general.history_dir}
+    plots:
+    - ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.png
+    - ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.svg
+
+  plot-simplex:
+    wdir: .
+    desc: Plots the simplex representation of the mixture coefficients
+    cmd: >
+      lyscripts plot simplex_plot
+      --input ${general.history_dir}/mixture_coef.csv
+      --output ${general.plots_dir}/simplex_3_comp_no_VI_VII.png
+    deps:
+    - ${general.history_dir}
+    plots:
+    - ${general.plots_dir}/simplex_3_comp_no_VI_VII.png
+    - ${general.plots_dir}/simplex_3_comp_no_VI_VII.svg
+    params:
+    - general
+
+  sample-params:
+    wdir: .
+    desc: Sample parameters from the fitted model
+    cmd: >
+      lyscripts mixture_sample
+      --mixture_coefs ${general.history_dir}/mixture_coef.csv
+      --model_params ${general.history_dir}/params.csv
+      --mode fixed_mixture
+      -d ${general.data}
+      -o ${general.history_dir}/
+    params:
+      - graph
+      - model
+      - modalities
+      - sampling
+      - general
+  
+  sample-params2:
+    wdir: .
+    desc: Sample parameters from the fitted model
+    cmd: >
+      lyscripts mixture_sample
+      --model_params ${general.history_dir}/params.csv
+      --mode fixed_latent
+      --mixture_coefs ${general.history_dir}/mixture_coef.csv
+      -d ${general.data}
+      -o ${general.history_dir}/
+    params:
+      - graph
+      - model
+      - modalities
+      - sampling
+      - general
+
+  plot-sampling:
+    wdir: .
+    desc: Plot the sampling results
+    cmd: >
+      lyscripts plot mixture_sampling_plotter
+      --input ${general.history_dir}/fixed_latent.hdf5
+      --output ${general.plots_dir}/sampling_3_comp
+      --mode fixed_mixture
+      -d ${general.data}
+      --model_params ${general.history_dir}/params.csv
+      --size 400
+    deps:
+      - ${general.history_dir}/fixed_latent.hdf5
+    params:
+      - general
+      - graph
+      - model
+
