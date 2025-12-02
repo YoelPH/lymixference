@@ -6,7 +6,7 @@ stages:
     wdir: .
     desc: Concatenate any number of datasets so they can be used as one for training
     vars:
-    - output: data/joined_2_test.csv
+    - output: data/joined_4.csv
     cmd: >
       lyscripts data join
       --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv 2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv data/UMC.csv data/USZ2.csv
@@ -29,8 +29,8 @@ stages:
       new 'modalities' from combining existing ones, e.g. using the logical AND or
       estimating the most likely involvement based on the observations only.
     vars:
-    - input: data/joined_2_test.csv
-    - output: data/enhanced_2_test.csv
+    - input: data/joined_4.csv
+    - output: data/enhanced_4.csv
     cmd: >
       lyscripts data enhance ${input} ${output} ${data_cleaning_modalities}
     deps:
@@ -48,22 +48,21 @@ stages:
     cmd: >
       python scripts/filter_and_reduce.py
       --locations ${data.locations}
-      --input data/enhanced_2_test.csv
-      --output data/filtered_2_test.csv
+      --input data/enhanced_4.csv
+      --output data/filtered_4.csv
     deps:
       - scripts/filter_and_reduce.py
-      - data/enhanced_2_test.csv
+      - data/enhanced_4.csv
     params:
     - general
     outs:
-      - data/filtered_2_test.csv
-
+      - data/filtered_4.csv
   fitting:
     wdir: .
     desc:
       Fit mixture model 
     cmd: >
-      lyscripts mixture_fit -i ${general.data}
+      lyscripts mixture_fit
     deps:
     - ${general.data}
     outs:
@@ -81,12 +80,12 @@ stages:
     cmd: >
       lyscripts plot mixture_plot
       --input ${fitting.folder_path}/mixture_coef.csv
-      --output ${general.plots_dir}/mixture_matrix_2_comp_test.png
+      --output ${general.plots_dir}/mixture_matrix_4_comp
     deps:
     - ${fitting.folder_path}
     plots:
-    - ${general.plots_dir}/mixture_matrix_2_comp_test.png
-    - ${general.plots_dir}/mixture_matrix_2_comp_test.svg
+    - ${general.plots_dir}/mixture_matrix_4_comp.png
+    - ${general.plots_dir}/mixture_matrix_4_comp.svg
 
   plot-simplex:
     wdir: .
@@ -94,12 +93,12 @@ stages:
     cmd: >
       lyscripts plot simplex_plot
       --input ${fitting.folder_path}/mixture_coef.csv
-      --output ${general.plots_dir}/simplex_2_comp_test.png
+      --output ${general.plots_dir}/simplex_4_comp
     deps:
-    - ${fitting.folder_path}
+      - ${fitting.folder_path}
     plots:
-    - ${general.plots_dir}/simplex_2_comp_test.png
-    - ${general.plots_dir}/simplex_2_comp_test.svg
+    - ${general.plots_dir}/simplex_4_comp.png
+    - ${general.plots_dir}/simplex_4_comp.svg
     params:
     - general
 
@@ -134,3 +133,19 @@ stages:
     - data
     outs:
     - ${sampling.output_path}
+
+  plot-comp-uncert:
+    wdir: .
+    desc:
+      Plot uncertainty in mixture components from bootstrapped refitting
+    cmd: >
+      lyscripts plot mixture_comp_uncertainty
+      --optimal_params ${fitting.folder_path}/optimal_params.csv
+      --input ${sampling.output_path}/optimal_params
+      --output ${general.plots_dir}/mixture_comp_uncertainty_4_comp.png
+    deps:
+    - ${fitting.folder_path}/optimal_params.csv
+    - ${sampling.output_path}/optimal_params
+    plots:
+    - ${general.plots_dir}/mixture_comp_uncertainty_4_comp.png
+    - ${general.plots_dir}/mixture_comp_uncertainty_4_comp.svg
