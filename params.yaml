@@ -8,7 +8,7 @@ general:
   history_dir: histories/4
 
 data:
-  locations: oral_cavity oropharynx hypopharynx
+  locations: oral_cavity oropharynx hypopharynx larynx
 
 ########################################################################################
 # This dictionary defines which LNLs are present in the
