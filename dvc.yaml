@@ -6,7 +6,7 @@ stages:
     wdir: .
     desc: Concatenate any number of datasets so they can be used as one for training
     vars:
-    - output: data/joined.csv
+    - output: data/joined_4.csv
     cmd: >
       lyscripts data join
       --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv 2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv data/UMC.csv data/USZ2.csv
@@ -29,8 +29,8 @@ stages:
       new 'modalities' from combining existing ones, e.g. using the logical AND or
       estimating the most likely involvement based on the observations only.
     vars:
-    - input: data/joined.csv
-    - output: data/enhanced.csv
+    - input: data/joined_4.csv
+    - output: data/enhanced_4.csv
     cmd: >
       lyscripts data enhance ${input} ${output} ${data_cleaning_modalities}
     deps:
@@ -44,27 +44,29 @@ stages:
     wdir: .
     desc:
       Select patients with oral cavity, oropharynx, hypopharynx and larynx subsites.
-      Further reduce the ICD codes. 3 comp no VI VII right now.
+      Further reduce the ICD codes.
     cmd: >
       python scripts/filter_and_reduce.py
-      --input data/enhanced.csv
-      --output data/filtered_2_comp_no_VI_VII.csv
+      --locations ${data.locations}
+      --input data/enhanced_4.csv
+      --output data/filtered_4.csv
     deps:
       - scripts/filter_and_reduce.py
-      - data/enhanced.csv
+      - data/enhanced_4.csv
     params:
     - general
     outs:
-      - data/filtered_2_comp_no_VI_VII.csv
-
+      - data/filtered_4.csv
   fitting:
     wdir: .
     desc:
       Fit mixture model 
     cmd: >
-      lyscripts mixture_fit -i ${general.data}
+      lyscripts mixture_fit
     deps:
     - ${general.data}
+    outs:
+    - ${fitting.folder_path}
     params:
     - graph
     - model
@@ -77,78 +79,73 @@ stages:
     desc: Plots the mixture component matrix.
     cmd: >
       lyscripts plot mixture_plot
-      --input ${general.history_dir}/mixture_coef.csv
-      --output ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.png
+      --input ${fitting.folder_path}/mixture_coef.csv
+      --output ${general.plots_dir}/mixture_matrix_4_comp
     deps:
-    - ${general.history_dir}
+    - ${fitting.folder_path}
     plots:
-    - ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.png
-    - ${general.plots_dir}/mixture_matrix_3_comp_no_VI_VII.svg
+    - ${general.plots_dir}/mixture_matrix_4_comp.png
+    - ${general.plots_dir}/mixture_matrix_4_comp.svg
 
   plot-simplex:
     wdir: .
     desc: Plots the simplex representation of the mixture coefficients
     cmd: >
       lyscripts plot simplex_plot
-      --input ${general.history_dir}/mixture_coef.csv
-      --output ${general.plots_dir}/simplex_3_comp_no_VI_VII.png
+      --input ${fitting.folder_path}/mixture_coef.csv
+      --output ${general.plots_dir}/simplex_4_comp
     deps:
-    - ${general.history_dir}
+      - ${fitting.folder_path}
     plots:
-    - ${general.plots_dir}/simplex_3_comp_no_VI_VII.png
-    - ${general.plots_dir}/simplex_3_comp_no_VI_VII.svg
+    - ${general.plots_dir}/simplex_4_comp.png
+    - ${general.plots_dir}/simplex_4_comp.svg
     params:
     - general
 
-  sample-params:
+  bootstrap:
     wdir: .
-    desc: Sample parameters from the fitted model
     cmd: >
-      lyscripts mixture_sample
-      --mixture_coefs ${general.history_dir}/mixture_coef.csv
-      --model_params ${general.history_dir}/params.csv
-      --mode fixed_mixture
-      -d ${general.data}
-      -o ${general.history_dir}/
-    params:
-      - graph
-      - model
-      - modalities
-      - sampling
-      - general
-  
-  sample-params2:
-    wdir: .
-    desc: Sample parameters from the fitted model
-    cmd: >
-      lyscripts mixture_sample
-      --model_params ${general.history_dir}/params.csv
-      --mode fixed_latent
-      --mixture_coefs ${general.history_dir}/mixture_coef.csv
-      -d ${general.data}
-      -o ${general.history_dir}/
-    params:
-      - graph
-      - model
-      - modalities
-      - sampling
-      - general
-
-  plot-sampling:
-    wdir: .
-    desc: Plot the sampling results
-    cmd: >
-      lyscripts plot mixture_sampling_plotter
-      --input ${general.history_dir}/fixed_latent.hdf5
-      --output ${general.plots_dir}/sampling_3_comp
-      --mode fixed_mixture
-      -d ${general.data}
-      --model_params ${general.history_dir}/params.csv
-      --size 400
+      lyscripts data bootstrap 
+      --output ${sampling.folder_path}
+      --input ${general.data}
     deps:
-      - ${general.history_dir}/fixed_latent.hdf5
+    - ${general.data}
+    outs:
+    - ${sampling.folder_path}
     params:
-      - general
-      - graph
-      - model
+    - sampling
 
+  refitting:
+    wdir: .
+    desc:
+      Re-fit mixture model on bootstrapped data
+    cmd: >
+      lyscripts mixture_fit -m True -sp ${sampling.starting_points} -i ${sampling.folder_path}
+    deps:
+    - ${sampling.folder_path}
+    params:
+    - sampling
+    - graph
+    - model
+    - em
+    - modalities
+    - general
+    - data
+    outs:
+    - ${sampling.output_path}
+
+  plot-comp-uncert:
+    wdir: .
+    desc:
+      Plot uncertainty in mixture components from bootstrapped refitting
+    cmd: >
+      lyscripts plot mixture_comp_uncertainty
+      --optimal_params ${fitting.folder_path}/optimal_params.csv
+      --input ${sampling.output_path}/optimal_params
+      --output ${general.plots_dir}/mixture_comp_uncertainty_4_comp.png
+    deps:
+    - ${fitting.folder_path}/optimal_params.csv
+    - ${sampling.output_path}/optimal_params
+    plots:
+    - ${general.plots_dir}/mixture_comp_uncertainty_4_comp.png
+    - ${general.plots_dir}/mixture_comp_uncertainty_4_comp.svg

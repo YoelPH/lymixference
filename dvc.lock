@@ -3,7 +3,7 @@ stages:
   join:
     cmd: "lyscripts data join --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv
       2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv
-      data/UMC.csv data/USZ2.csv --output data/joined.csv\n"
+      data/UMC.csv data/USZ2.csv --output data/joined_4.csv\n"
     deps:
     - path: 2021-clb-oropharynx/data.csv
       hash: md5
@@ -34,15 +34,15 @@ stages:
       md5: 5881f048dae854da7312945d1417f3ec
       size: 212402
     outs:
-    - path: data/joined.csv
+    - path: data/joined_4.csv
       hash: md5
       md5: 3763b23593cc9539e1c0b055f35c0ace
       size: 1821171
   enhance:
-    cmd: "lyscripts data enhance data/joined.csv data/enhanced.csv --modalities CT
-      MRI PET FNA diagnostic_consensus pathology pCT\n"
+    cmd: "lyscripts data enhance data/joined_4.csv data/enhanced_4.csv --modalities
+      CT MRI PET FNA diagnostic_consensus pathology pCT\n"
     deps:
-    - path: data/joined.csv
+    - path: data/joined_4.csv
       hash: md5
       md5: 3763b23593cc9539e1c0b055f35c0ace
       size: 1821171
@@ -74,51 +74,52 @@ stages:
           - 1.0
           - 1.0
     outs:
-    - path: data/enhanced.csv
+    - path: data/enhanced_4.csv
       hash: md5
       md5: a2b8b42e05f122a7c7daea9eaa6ef76e
       size: 2210944
   filter:
-    cmd: "python scripts/filter_and_reduce.py --input data/enhanced.csv --output data/filtered.csv\n"
+    cmd: "python scripts/filter_and_reduce.py --locations oral_cavity oropharynx hypopharynx
+      larynx --input data/enhanced_4.csv --output data/filtered_4.csv\n"
     deps:
-    - path: data/enhanced.csv
+    - path: data/enhanced_4.csv
       hash: md5
       md5: a2b8b42e05f122a7c7daea9eaa6ef76e
       size: 2210944
     - path: scripts/filter_and_reduce.py
       hash: md5
-      md5: afb25861f0ffab607e9b75fa2612f93a
-      size: 5056
+      md5: 693afccd967e794ed36c0910f78a3263
+      size: 7313
     params:
       params.yaml:
         general:
-          data: data/filtered.csv
+          data: data/filtered_4.csv
           data_folder: data
           metrics: metrics.json
           plots_dir: plots
-          history_dir: histories
+          history_dir: histories/4
     outs:
-    - path: data/filtered.csv
+    - path: data/filtered_4.csv
+      hash: md5
+      md5: 99c77c450344ce13329ccae92de9bf8a
+      size: 1973376
+  fitting:
+    cmd: "lyscripts mixture_fit\n"
+    deps:
+    - path: data/filtered_4.csv
       hash: md5
       md5: 7dd851590e8d3c3fbe1980dce0d4db9a
       size: 1366123
-  fitting:
-    cmd: "lyscripts mixture_fit -i data/filtered.csv\n"
-    deps:
-    - path: data/filtered.csv
-      hash: md5
-      md5: 1bfb813c46c20e164df9c838e7d6e295
-      size: 1359913
     params:
       params.yaml:
         em:
           seed: 42
         general:
-          data: data/filtered.csv
+          data: data/filtered_4.csv
           data_folder: data
           metrics: metrics.json
           plots_dir: plots
-          history_dir: histories
+          history_dir: histories/4
         graph:
           tumor:
             primary:
@@ -127,8 +128,6 @@ stages:
             - III
             - IV
             - V
-            - VI
-            - VII
           lnl:
             I:
             - II
@@ -139,8 +138,6 @@ stages:
             IV:
             - V
             V: []
-            VI: []
-            VII: []
         modalities:
           CT:
           - 0.76
@@ -181,58 +178,64 @@ stages:
           num_components: 3
           likelihood_tolerance: 0.01
           kwargs:
-  plot-mixture-matrix:
-    cmd: "lyscripts plot mixture_plot --input histories/mixture_coef.csv --output
-      plots/mixture_matrix.png\n"
-    deps:
-    - path: histories
-      hash: md5
-      md5: e680e7c0b95e46d01110ce95cd89f2fc.dir
-      size: 1551535866
-      nfiles: 8
     outs:
-    - path: plots/mixture_matrix.png
+    - path: histories/4/original_fit
       hash: md5
-      md5: 06308a42d91a332dc33851e4d226678d
-      size: 50311
-    - path: plots/mixture_matrix.svg
-      hash: md5
-      md5: 78a3c6e859ebd45ee32cae1b719339fd
-      size: 35490
-  plot-simplex:
-    cmd: "lyscripts plot simplex_plot --input histories/mixture_coef.csv --output
-      plots/simplex.png\n"
+      md5: c3177eddf67cfd87d10984536d778c97.dir
+      size: 137089
+      nfiles: 4
+  plot-mixture-matrix:
+    cmd: "lyscripts plot mixture_plot --input histories/4/original_fit/mixture_coef.csv
+      --output plots/mixture_matrix_4_comp\n"
     deps:
-    - path: histories
+    - path: histories/4/original_fit
       hash: md5
-      md5: 7efd0f872cc8b3ef40d6fd0d4384f4ef.dir
-      size: 391418
-      nfiles: 6
+      md5: c3177eddf67cfd87d10984536d778c97.dir
+      size: 137089
+      nfiles: 4
+    outs:
+    - path: plots/mixture_matrix_4_comp.png
+      hash: md5
+      md5: 1d00964472dcbf7ea215f314ea49e34e
+      size: 50967
+    - path: plots/mixture_matrix_4_comp.svg
+      hash: md5
+      md5: 823c629da4950fa29c0951d305877b9d
+      size: 38423
+  plot-simplex:
+    cmd: "lyscripts plot simplex_plot --input histories/4/original_fit/mixture_coef.csv
+      --output plots/simplex_4_comp\n"
+    deps:
+    - path: histories/4/original_fit
+      hash: md5
+      md5: c3177eddf67cfd87d10984536d778c97.dir
+      size: 137089
+      nfiles: 4
     params:
       params.yaml:
         general:
-          data: data/filtered.csv
+          data: data/filtered_4.csv
           data_folder: data
           metrics: metrics.json
           plots_dir: plots
-          history_dir: histories
+          history_dir: histories/4
     outs:
-    - path: plots/simplex.png
+    - path: plots/simplex_4_comp.png
       hash: md5
-      md5: d5777bbcc63ad5342453e72ade162307
-      size: 81871
-    - path: plots/simplex.svg
+      md5: 30d4334022fa57d7a9045d142957aa7e
+      size: 81690
+    - path: plots/simplex_4_comp.svg
       hash: md5
-      md5: 5256c4d644e993457cdbabfa4e270b42
-      size: 60530
+      md5: 356ba3ab7bc13baaad5dd4734d1d6ad9
+      size: 65763
   sample-params:
     cmd: "lyscripts mixture_sample --mixture_coefs histories/mixture_coef.csv --model_params
-      histories/params.csv --mode fixed_latent -d data/filtered.csv -o histories/
-      -c True\n"
+      histories/params.csv --mode fixed_mixture -d data/filtered_3_comp_no_VI_VII.csv
+      -o histories/\n"
     params:
       params.yaml:
         general:
-          data: data/filtered.csv
+          data: data/filtered_3_comp_no_VI_VII.csv
           data_folder: data
           metrics: metrics.json
           plots_dir: plots
@@ -245,8 +248,6 @@ stages:
             - III
             - IV
             - V
-            - VI
-            - VII
           lnl:
             I:
             - II
@@ -257,8 +258,229 @@ stages:
             IV:
             - V
             V: []
-            VI: []
-            VII: []
+        modalities:
+          CT:
+          - 0.76
+          - 0.81
+          MRI:
+          - 0.63
+          - 0.81
+          PET:
+          - 0.86
+          - 0.79
+          FNA:
+          - 0.98
+          - 0.8
+          diagnostic_consensus:
+          - 0.86
+          - 0.81
+          pathology:
+          - 1.0
+          - 1.0
+          pCT:
+          - 0.86
+          - 0.81
+          max_llh:
+          - 1.0
+          - 1.0
+        model:
+          class: Unilateral
+          side: ipsi
+          distributions:
+            early:
+              frozen: binomial
+              max_time: 10
+              kwargs:
+                p: 0.3
+            late:
+              parametric: binomial
+              max_time: 10
+          num_components: 3
+          likelihood_tolerance: 0.001
+          kwargs:
+        sampling:
+          steps: 35000
+  plot-sampling:
+    cmd: "lyscripts plot mixture_sampling_plotter --input histories/fixed_latent.hdf5
+      --output plots/sampling_3_comp --mode fixed_mixture -d data/filtered_3_comp_no_VI_VII.csv
+      --model_params histories/params.csv --size 400\n"
+    deps:
+    - path: histories/fixed_latent.hdf5
+      hash: md5
+      md5: 4c15e82c3e99f9ab833a0cbbf7d8eaac
+      size: 976321224
+    params:
+      params.yaml:
+        general:
+          data: data/filtered_3_comp_no_VI_VII.csv
+          data_folder: data
+          metrics: metrics.json
+          plots_dir: plots
+          history_dir: histories
+        graph:
+          tumor:
+            primary:
+            - I
+            - II
+            - III
+            - IV
+            - V
+          lnl:
+            I:
+            - II
+            II:
+            - III
+            III:
+            - IV
+            IV:
+            - V
+            V: []
+        model:
+          class: Unilateral
+          side: ipsi
+          distributions:
+            early:
+              frozen: binomial
+              max_time: 10
+              kwargs:
+                p: 0.3
+            late:
+              parametric: binomial
+              max_time: 10
+          num_components: 3
+          likelihood_tolerance: 0.001
+          kwargs:
+  sample-params2:
+    cmd: "lyscripts mixture_sample --model_params histories/params.csv --mode fixed_latent
+      --mixture_coefs histories/mixture_coef.csv -d data/filtered_3_comp_no_VI_VII.csv
+      -o histories/\n"
+    params:
+      params.yaml:
+        general:
+          data: data/filtered_3_comp_no_VI_VII.csv
+          data_folder: data
+          metrics: metrics.json
+          plots_dir: plots
+          history_dir: histories
+        graph:
+          tumor:
+            primary:
+            - I
+            - II
+            - III
+            - IV
+            - V
+          lnl:
+            I:
+            - II
+            II:
+            - III
+            III:
+            - IV
+            IV:
+            - V
+            V: []
+        modalities:
+          CT:
+          - 0.76
+          - 0.81
+          MRI:
+          - 0.63
+          - 0.81
+          PET:
+          - 0.86
+          - 0.79
+          FNA:
+          - 0.98
+          - 0.8
+          diagnostic_consensus:
+          - 0.86
+          - 0.81
+          pathology:
+          - 1.0
+          - 1.0
+          pCT:
+          - 0.86
+          - 0.81
+          max_llh:
+          - 1.0
+          - 1.0
+        model:
+          class: Unilateral
+          side: ipsi
+          distributions:
+            early:
+              frozen: binomial
+              max_time: 10
+              kwargs:
+                p: 0.3
+            late:
+              parametric: binomial
+              max_time: 10
+          num_components: 3
+          likelihood_tolerance: 0.001
+          kwargs:
+        sampling:
+          steps: 35000
+  bootstrap:
+    cmd: "lyscripts data bootstrap  --output data/bootstrap_4 --input data/filtered_4.csv\n"
+    deps:
+    - path: data/filtered_4.csv
+      hash: md5
+      md5: 7dd851590e8d3c3fbe1980dce0d4db9a
+      size: 1366123
+    params:
+      params.yaml:
+        sampling:
+          n_bootstraps: 200
+          folder_path: data/bootstrap_4
+          output_path: histories/4/resampling
+          starting_points: histories/4/original_fit/optimal_params.csv
+    outs:
+    - path: data/bootstrap_4
+      hash: md5
+      md5: a0ada2097c1d47079ec7c011f15d983a.dir
+      size: 273264565
+      nfiles: 200
+  refitting:
+    cmd: "lyscripts mixture_fit -m True -sp histories/4/original_fit/optimal_params.csv
+      -i data/bootstrap_4\n"
+    deps:
+    - path: data/bootstrap_4
+      hash: md5
+      md5: a0ada2097c1d47079ec7c011f15d983a.dir
+      size: 273264565
+      nfiles: 200
+    params:
+      params.yaml:
+        data:
+          locations: oral_cavity oropharynx hypopharynx
+        em:
+          seed: 42
+        general:
+          data: data/filtered_4.csv
+          data_folder: data
+          metrics: metrics.json
+          plots_dir: plots
+          history_dir: histories/4
+        graph:
+          tumor:
+            primary:
+            - I
+            - II
+            - III
+            - IV
+            - V
+          lnl:
+            I:
+            - II
+            II:
+            - III
+            III:
+            - IV
+            IV:
+            - V
+            V: []
         modalities:
           CT:
           - 0.76
@@ -300,58 +522,35 @@ stages:
           likelihood_tolerance: 0.01
           kwargs:
         sampling:
-          steps: 6000
-  plot-sampling:
-    cmd: "lyscripts plot mixture_sampling_plotter --input histories/fixed_mixture.hdf5
-      --output plots/sampling --mode fixed_mixture -d data/filtered.csv --model_params
-      histories/params.csv --size 250\n"
-    deps:
-    - path: histories/fixed_mixture.hdf5
+          n_bootstraps: 200
+          folder_path: data/bootstrap_4
+          output_path: histories/4/resampling
+          starting_points: histories/4/original_fit/optimal_params.csv
+    outs:
+    - path: histories/4/resampling
       hash: md5
-      md5: a648e45a5564112d72ae2d8ba7e5cdc0
-      size: 140202136
-    params:
-      params.yaml:
-        general:
-          data: data/filtered.csv
-          data_folder: data
-          metrics: metrics.json
-          plots_dir: plots
-          history_dir: histories
-        graph:
-          tumor:
-            primary:
-            - I
-            - II
-            - III
-            - IV
-            - V
-            - VI
-            - VII
-          lnl:
-            I:
-            - II
-            II:
-            - III
-            III:
-            - IV
-            IV:
-            - V
-            V: []
-            VI: []
-            VII: []
-        model:
-          class: Unilateral
-          side: ipsi
-          distributions:
-            early:
-              frozen: binomial
-              max_time: 10
-              kwargs:
-                p: 0.3
-            late:
-              parametric: binomial
-              max_time: 10
-          num_components: 3
-          likelihood_tolerance: 0.01
-          kwargs:
+      md5: b71f884a4f6d53425987da2445910f1b.dir
+      size: 16612373
+      nfiles: 600
+  plot-comp-uncert:
+    cmd: "lyscripts plot mixture_comp_uncertainty --optimal_params histories/4/original_fit/optimal_params.csv
+      --input histories/4/resampling/optimal_params --output plots/mixture_comp_uncertainty_4_comp.png\n"
+    deps:
+    - path: histories/4/original_fit/optimal_params.csv
+      hash: md5
+      md5: 66e8bf0297d3f6d8dca0361123d0ae99
+      size: 1986
+    - path: histories/4/resampling/optimal_params
+      hash: md5
+      md5: 4ff01570ab30e12e22d0f1fa41efc12a.dir
+      size: 394702
+      nfiles: 200
+    outs:
+    - path: plots/mixture_comp_uncertainty_4_comp.png
+      hash: md5
+      md5: 12de02dd12bce3c3d2a481cb640f887c
+      size: 38999
+    - path: plots/mixture_comp_uncertainty_4_comp.svg
+      hash: md5
+      md5: 034ca3b746235eb8444248ef1ea85192
+      size: 49063

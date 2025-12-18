@@ -1,11 +1,14 @@
 # Define some default directories, which can then be used
 # in the pipeline file `dvc.yaml`.
 general:
-  data: data/filtered_3_comp_no_VI_VII.csv
+  data: data/filtered_4.csv
   data_folder: data
   metrics: metrics.json
   plots_dir: plots
-  history_dir: histories 
+  history_dir: histories/4
+
+data:
+  locations: oral_cavity oropharynx hypopharynx larynx
 
 ########################################################################################
 # This dictionary defines which LNLs are present in the
@@ -19,18 +22,6 @@ graph:
     III: [IV]
     IV: [V]
     V: []
-
-# graph:
-#   tumor:
-#     primary: [I, II, III, IV, V, VI, VII]
-#   lnl:
-#     I: [II]
-#     II: [III]
-#     III: [IV]
-#     IV: [V]
-#     V: []
-#     VI: []
-#     VII: []
 
 
 ########################################################################################
@@ -47,13 +38,8 @@ model:
       parametric: binomial
       max_time: 10
   num_components: 3
-  likelihood_tolerance: 0.001
-  # split_by: ("tumor", "1", "subsite")
-  # keyword arguments to pass to the model constructor
+  likelihood_tolerance: 0.01
   kwargs:
-
-em:
-  seed: 42
 
 modalities:
   CT: [0.76, 0.81]
@@ -86,6 +72,13 @@ data_cleaning_modalities:
 # directly into the command.
 inference_modalities:
   max_llh: [1.0, 1.0]
-
+fitting:
+  folder_path: histories/4/original_fit
 sampling:
-  steps: 35000
+  n_bootstraps: 200
+  folder_path: data/bootstrap_4
+  output_path: histories/4/resampling
+  starting_points: histories/4/original_fit/optimal_params.csv
+
+em:
+  seed: 42
