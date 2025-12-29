@@ -108,8 +108,8 @@ stages:
     deps:
     - path: data/filtered_4.csv
       hash: md5
-      md5: 7dd851590e8d3c3fbe1980dce0d4db9a
-      size: 1366123
+      md5: 99c77c450344ce13329ccae92de9bf8a
+      size: 1973376
     params:
       params.yaml:
         em:
@@ -175,14 +175,14 @@ stages:
             late:
               parametric: binomial
               max_time: 10
-          num_components: 3
+          num_components: 4
           likelihood_tolerance: 0.01
           kwargs:
     outs:
     - path: histories/4/original_fit
       hash: md5
-      md5: c3177eddf67cfd87d10984536d778c97.dir
-      size: 137089
+      md5: a2d25048bfc18a75ea4e6b9d84229564.dir
+      size: 213072
       nfiles: 4
   plot-mixture-matrix:
     cmd: "lyscripts plot mixture_plot --input histories/4/original_fit/mixture_coef.csv
@@ -190,18 +190,18 @@ stages:
     deps:
     - path: histories/4/original_fit
       hash: md5
-      md5: c3177eddf67cfd87d10984536d778c97.dir
-      size: 137089
+      md5: a2d25048bfc18a75ea4e6b9d84229564.dir
+      size: 213072
       nfiles: 4
     outs:
     - path: plots/mixture_matrix_4_comp.png
       hash: md5
-      md5: 1d00964472dcbf7ea215f314ea49e34e
-      size: 50967
+      md5: 199a3a6ec73d797b26757a7b42d16c5e
+      size: 70293
     - path: plots/mixture_matrix_4_comp.svg
       hash: md5
-      md5: 823c629da4950fa29c0951d305877b9d
-      size: 38423
+      md5: 57822e108bcab6d3429c801c7a757491
+      size: 50409
   plot-simplex:
     cmd: "lyscripts plot simplex_plot --input histories/4/original_fit/mixture_coef.csv
       --output plots/simplex_4_comp\n"
@@ -427,8 +427,8 @@ stages:
     deps:
     - path: data/filtered_4.csv
       hash: md5
-      md5: 7dd851590e8d3c3fbe1980dce0d4db9a
-      size: 1366123
+      md5: 99c77c450344ce13329ccae92de9bf8a
+      size: 1973376
     params:
       params.yaml:
         sampling:
@@ -439,8 +439,8 @@ stages:
     outs:
     - path: data/bootstrap_4
       hash: md5
-      md5: a0ada2097c1d47079ec7c011f15d983a.dir
-      size: 273264565
+      md5: b712091629bf6338502d1c5f1ee73b8d.dir
+      size: 394763659
       nfiles: 200
   refitting:
     cmd: "lyscripts mixture_fit -m True -sp histories/4/original_fit/optimal_params.csv
