@@ -5,12 +5,10 @@ stages:
   join:
     wdir: .
     desc: Concatenate any number of datasets so they can be used as one for training
-    vars:
-    - output: data/joined_4.csv
     cmd: >
       lyscripts data join
       --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv 2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv 2025-umcg-hypopharynx-larynx/data.csv 2025-usz-hypopharynx-larynx/data.csv
-      --output ${output}
+      --output data/joined_${model.num_components}.csv
     deps:
     - 2021-usz-oropharynx/data.csv
     - 2021-clb-oropharynx/data.csv
@@ -20,7 +18,9 @@ stages:
     - 2025-umcg-hypopharynx-larynx/data.csv
     - 2025-usz-hypopharynx-larynx/data.csv
     outs:
-    - ${output}
+    - data/joined_${model.num_components}.csv
+    params:
+    - model.num_components
 
   enhance:
     wdir: .
@@ -28,17 +28,15 @@ stages:
       This stage fixes the super- and sub-level reporting for the LNLs and also creates
       new 'modalities' from combining existing ones, e.g. using the logical AND or
       estimating the most likely involvement based on the observations only.
-    vars:
-    - input: data/joined_4.csv
-    - output: data/enhanced_4.csv
     cmd: >
-      lyscripts data enhance ${input} ${output} ${data_cleaning_modalities}
+      lyscripts data enhance data/joined_${model.num_components}.csv data/enhanced_${model.num_components}.csv ${data_cleaning_modalities}
     deps:
-    - ${input}
+    - data/joined_${model.num_components}.csv
     params:
     - modalities
+    - model.num_components
     outs:
-    - ${output}
+    - data/enhanced_${model.num_components}.csv
 
   filter:
     wdir: .
@@ -48,15 +46,17 @@ stages:
     cmd: >
       python scripts/filter_and_reduce.py
       --locations ${data.locations}
-      --input data/enhanced_4.csv
-      --output data/filtered_4.csv
+      --input data/enhanced_${model.num_components}.csv
+      --output data/filtered_${model.num_components}.csv
     deps:
       - scripts/filter_and_reduce.py
-      - data/enhanced_4.csv
+      - data/enhanced_${model.num_components}.csv
     params:
-    - general
+    - data
+    - model.num_components
     outs:
-      - data/filtered_4.csv
+      - data/filtered_${model.num_components}.csv
+
   fitting:
     wdir: .
     desc:
@@ -80,12 +80,16 @@ stages:
     cmd: >
       lyscripts plot mixture_plot
       --input ${fitting.folder_path}/mixture_coef.csv
-      --output ${general.plots_dir}/mixture_matrix_4_comp
+      --output ${general.plots_dir}/mixture_matrix_${model.num_components}_comp
     deps:
     - ${fitting.folder_path}
     plots:
-    - ${general.plots_dir}/mixture_matrix_4_comp.png
-    - ${general.plots_dir}/mixture_matrix_4_comp.svg
+    - ${general.plots_dir}/mixture_matrix_${model.num_components}_comp.png
+    - ${general.plots_dir}/mixture_matrix_${model.num_components}_comp.svg
+    params:
+    - general
+    - fitting
+    - model.num_components
 
   # plot-simplex:
   #   wdir: .
@@ -142,10 +146,15 @@ stages:
       lyscripts plot mixture_comp_uncertainty
       --optimal_params ${fitting.folder_path}/optimal_params.csv
       --input ${sampling.output_path}/optimal_params
-      --output ${general.plots_dir}/mixture_comp_uncertainty_4_comp.png
+      --output ${general.plots_dir}/mixture_comp_uncertainty_${model.num_components}_comp.png
     deps:
     - ${fitting.folder_path}/optimal_params.csv
     - ${sampling.output_path}/optimal_params
     plots:
-    - ${general.plots_dir}/mixture_comp_uncertainty_4_comp.png
-    - ${general.plots_dir}/mixture_comp_uncertainty_4_comp.svg
+    - ${general.plots_dir}/mixture_comp_uncertainty_${model.num_components}_comp.png
+    - ${general.plots_dir}/mixture_comp_uncertainty_${model.num_components}_comp.svg
+    params:
+    - general
+    - fitting
+    - sampling
+    - model.num_components

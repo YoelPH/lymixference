@@ -3,7 +3,8 @@ stages:
   join:
     cmd: "lyscripts data join --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv
       2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv
-      data/UMC.csv data/USZ2.csv --output data/joined_4.csv\n"
+      2025-umcg-hypopharynx-larynx/data.csv 2025-usz-hypopharynx-larynx/data.csv --output
+      data/joined_2.csv\n"
     deps:
     - path: 2021-clb-oropharynx/data.csv
       hash: md5
@@ -25,24 +26,27 @@ stages:
       hash: md5
       md5: 7baa8021efbff0126fcf297e52106168
       size: 82567
-    - path: data/UMC.csv
+    - path: 2025-umcg-hypopharynx-larynx/data.csv
       hash: md5
       md5: ad3a40b76174aa3b7d1a4a6e1a1bebf8
       size: 309194
-    - path: data/USZ2.csv
+    - path: 2025-usz-hypopharynx-larynx/data.csv
       hash: md5
       md5: 5881f048dae854da7312945d1417f3ec
       size: 212402
+    params:
+      params.yaml:
+        model.num_components: 2
     outs:
-    - path: data/joined_4.csv
+    - path: data/joined_2.csv
       hash: md5
       md5: 3763b23593cc9539e1c0b055f35c0ace
       size: 1821171
   enhance:
-    cmd: "lyscripts data enhance data/joined_4.csv data/enhanced_4.csv --modalities
+    cmd: "lyscripts data enhance data/joined_2.csv data/enhanced_2.csv --modalities
       CT MRI PET FNA diagnostic_consensus pathology pCT\n"
     deps:
-    - path: data/joined_4.csv
+    - path: data/joined_2.csv
       hash: md5
       md5: 3763b23593cc9539e1c0b055f35c0ace
       size: 1821171
@@ -73,16 +77,17 @@ stages:
           max_llh:
           - 1.0
           - 1.0
+        model.num_components: 2
     outs:
-    - path: data/enhanced_4.csv
+    - path: data/enhanced_2.csv
       hash: md5
       md5: a2b8b42e05f122a7c7daea9eaa6ef76e
       size: 2210944
   filter:
-    cmd: "python scripts/filter_and_reduce.py --locations oral_cavity oropharynx hypopharynx
-      larynx --input data/enhanced_4.csv --output data/filtered_4.csv\n"
+    cmd: "python scripts/filter_and_reduce.py --locations oral_cavity oropharynx --input
+      data/enhanced_2.csv --output data/filtered_2.csv\n"
     deps:
-    - path: data/enhanced_4.csv
+    - path: data/enhanced_2.csv
       hash: md5
       md5: a2b8b42e05f122a7c7daea9eaa6ef76e
       size: 2210944
@@ -92,17 +97,14 @@ stages:
       size: 7313
     params:
       params.yaml:
-        general:
-          data: data/filtered_4.csv
-          data_folder: data
-          metrics: metrics.json
-          plots_dir: plots
-          history_dir: histories/4
+        data:
+          locations: oral_cavity oropharynx
+        model.num_components: 2
     outs:
-    - path: data/filtered_4.csv
+    - path: data/filtered_2.csv
       hash: md5
-      md5: 99c77c450344ce13329ccae92de9bf8a
-      size: 1973376
+      md5: 00be6380e31bbb502e113beb6e24499c
+      size: 1058261
   fitting:
     cmd: "lyscripts mixture_fit\n"
     deps:
