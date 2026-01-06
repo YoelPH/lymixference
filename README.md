@@ -6,9 +6,11 @@ It contains:
 - a **DVC pipeline** (see `dvc.yaml` + `params.yaml`) to rebuild analysis artifacts, and
 - **precomputed outputs** committed to Git for the 2/3/4-component mixture models (so you can inspect results immediately).
 
-The long-running parts are **bootstrap + refitting** and can be very time consuming. For that reason, this repo ships already computed outputs under `histories/` and plots under `plots/`.
+The long-running parts are **bootstrap + refitting** and can be very time consuming. For that reason, this repo ships already computed outputs under `histories_precomputed/` and plots under `plots_precomputed/`.
 
 If you want to reproduce everything from scratch, you can do so via DVC.
+
+The most important Figures regarding the 4 component model are in the notebook `4_comp_evaluation.ipynb` and ready to be reproduced or to be adapted to explore other predictions.
 
 ## Quickstart
 
@@ -52,9 +54,9 @@ You can inspect the repository outputs without running DVC.
 
 Typical entry points:
 - `4_comp_evaluation.ipynb`
-- `histories/<K>/original_fit/optimal_params.csv`
-- `histories/<K>/resampling/` (bootstrap refits)
-- `plots/` (paper plots)
+- `histories_precomputed/<K>/original_fit/optimal_params.csv`
+- `histories_precomputed/<K>/resampling/` (bootstrap refits)
+- `plots_precomputed/` (paper plots)
 
 ## What gets produced
 
