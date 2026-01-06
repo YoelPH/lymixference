@@ -37,7 +37,7 @@ model:
     late:
       parametric: binomial
       max_time: 10
-  num_components: 3
+  num_components: 4
   likelihood_tolerance: 0.01
   kwargs:
 

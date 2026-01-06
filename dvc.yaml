@@ -87,52 +87,52 @@ stages:
     - ${general.plots_dir}/mixture_matrix_4_comp.png
     - ${general.plots_dir}/mixture_matrix_4_comp.svg
 
-  plot-simplex:
-    wdir: .
-    desc: Plots the simplex representation of the mixture coefficients
-    cmd: >
-      lyscripts plot simplex_plot
-      --input ${fitting.folder_path}/mixture_coef.csv
-      --output ${general.plots_dir}/simplex_4_comp
-    deps:
-      - ${fitting.folder_path}
-    plots:
-    - ${general.plots_dir}/simplex_4_comp.png
-    - ${general.plots_dir}/simplex_4_comp.svg
-    params:
-    - general
+  # plot-simplex:
+  #   wdir: .
+  #   desc: Plots the simplex representation of the mixture coefficients
+  #   cmd: >
+  #     lyscripts plot simplex_plot
+  #     --input ${fitting.folder_path}/mixture_coef.csv
+  #     --output ${general.plots_dir}/simplex_4_comp
+  #   deps:
+  #     - ${fitting.folder_path}
+  #   plots:
+  #   - ${general.plots_dir}/simplex_4_comp.png
+  #   - ${general.plots_dir}/simplex_4_comp.svg
+  #   params:
+  #   - general
 
-  bootstrap:
-    wdir: .
-    cmd: >
-      lyscripts data bootstrap 
-      --output ${sampling.folder_path}
-      --input ${general.data}
-    deps:
-    - ${general.data}
-    outs:
-    - ${sampling.folder_path}
-    params:
-    - sampling
+  # bootstrap:
+  #   wdir: .
+  #   cmd: >
+  #     lyscripts data bootstrap 
+  #     --output ${sampling.folder_path}
+  #     --input ${general.data}
+  #   deps:
+  #   - ${general.data}
+  #   outs:
+  #   - ${sampling.folder_path}
+  #   params:
+  #   - sampling
 
-  refitting:
-    wdir: .
-    desc:
-      Re-fit mixture model on bootstrapped data
-    cmd: >
-      lyscripts mixture_fit -m True -sp ${sampling.starting_points} -i ${sampling.folder_path}
-    deps:
-    - ${sampling.folder_path}
-    params:
-    - sampling
-    - graph
-    - model
-    - em
-    - modalities
-    - general
-    - data
-    outs:
-    - ${sampling.output_path}
+  # refitting:
+  #   wdir: .
+  #   desc:
+  #     Re-fit mixture model on bootstrapped data
+  #   cmd: >
+  #     lyscripts mixture_fit -m True -sp ${sampling.starting_points} -i ${sampling.folder_path}
+  #   deps:
+  #   - ${sampling.folder_path}
+  #   params:
+  #   - sampling
+  #   - graph
+  #   - model
+  #   - em
+  #   - modalities
+  #   - general
+  #   - data
+  #   outs:
+  #   - ${sampling.output_path}
 
   plot-comp-uncert:
     wdir: .
