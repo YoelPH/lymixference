@@ -2,8 +2,8 @@
 # Core dependencies for mixture model analysis
 
 # Specific package commits
-git+https://github.com/YoelPH/lyscripts.git@4bf0469fb459b4e6ba470813e9b4fa9240106e33
-git+https://github.com/YoelPH/lymixture.git@a89b9b0d5f8f38a4d3610c61ebabf244f91bce11
+git+https://github.com/lycosystem/lyscripts.git@v0.1.0
+git+https://github.com/lycosystem/lymixture.git@0.0.3
 
 # Core scientific computing
 numpy>=2.1.0
