@@ -9,7 +9,7 @@ stages:
     - output: data/joined_4.csv
     cmd: >
       lyscripts data join
-      --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv 2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv data/UMC.csv data/USZ2.csv
+      --inputs 2021-usz-oropharynx/data.csv 2021-clb-oropharynx/data.csv 2023-isb-multisite/data.csv 2023-clb-multisite/data.csv 2024-hvh-oropharynx/data.csv 2025-umcg-hypopharynx-larynx/data.csv 2025-usz-hypopharynx-larynx/data.csv
       --output ${output}
     deps:
     - 2021-usz-oropharynx/data.csv
@@ -17,8 +17,8 @@ stages:
     - 2023-isb-multisite/data.csv
     - 2023-clb-multisite/data.csv
     - 2024-hvh-oropharynx/data.csv
-    - data/UMC.csv
-    - data/USZ2.csv
+    - 2025-umcg-hypopharynx-larynx/data.csv
+    - 2025-usz-hypopharynx-larynx/data.csv
     outs:
     - ${output}
 
