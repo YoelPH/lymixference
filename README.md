@@ -1,5 +1,9 @@
 # lymixference — reproduction package for the mixture-model paper
 
+All code used in this project is **open source** and available in the following repositories:
+- [lymph](https://github.com/lycosystem/lymph)
+- [lymixture](https://github.com/lycosystem/lymixture)
+
 This repository is a **reproducible snapshot** for our paper.
 
 It contains:
@@ -11,6 +15,8 @@ The long-running parts are **bootstrap + refitting** and can be very time consum
 If you want to reproduce everything from scratch, you can do so via DVC.
 
 The most important Figures regarding the 4 component model are in the notebook `4_comp_evaluation.ipynb` and ready to be reproduced or to be adapted to explore other predictions.
+
+
 
 ## Quickstart
 
